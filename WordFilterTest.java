@@ -19,7 +19,7 @@ public class WordFilterTest {
 		if (words == null) {
 			error("getFourLetterWords");
 		} else if(words.size()<8||!words.contains("food")||
-				!words.contains("pear")||words.contains("taco")) {
+				!words.contains("pear")||!words.contains("taco")) {
 			error("getFourLetterWords");
 		}
 		//findFour
