@@ -18,23 +18,20 @@ public class WordFilter {
 
     public List<String> getLog() {
         // Returns a list of all four letter words found in your text
-        // Does not need to preserve the original capitalization
-        // (though you may do so if you want to)
         // Should be listed in the order the words were replaced
         // If the same word is found multiple times,
         // it should be listed in the log multiple times
         return null;
     }
 
-	public int findFour() {
-		// Returns the number of four-letter words in text
-		// Includes all capitalization variations
-		return -1;
+	public List<String> findFour() {
+		// Returns a list of the four-letter words in the text
+        // Should be listed in the order they appear
+ 		return null;
 	}
 	
-	public String replaceFour(String wordToReplace, String symbols) {
-		// Replaces the first instance of wordToReplace
-        // in the text with symbols
+	public String replaceFour(String wordToReplace) {
+		// Replaces the first instance of wordToReplace in the text with ****
 		// Returns the updated text
 		// Should return the unchanged text if wordToReplace does not exist in it
 		return null;

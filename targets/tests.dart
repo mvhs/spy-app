@@ -63,6 +63,7 @@ final List<String> files = ["WordFilter.java", "SpyApp.java"];
 /// completed implementations as part of your tests. You can
 /// use a different tests.dart for tests you run on submissions.
 List<Target> getTargets(){
-    InputOutput io1 = new InputOutput("Tests", "", "");
-    return IOTarget.makeMultiJava("WordFilterTest", [io1]);
+    InputOutput io1 = new InputOutput("Required Functionality", "", "");
+    InputOutput io2 = new InputOutput.withArgs("Bonus Challenge", "challenge", "");
+    return IOTarget.makeMultiJava("WordFilterTest", [io1, io2]);
 }

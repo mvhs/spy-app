@@ -13,34 +13,46 @@ import java.util.List;
  * @author Jack Thakar
  */
 public class WordFilterTest {
-	public static void main(String[] args) {
-		//getFourLetterWords
-		List<String> words = WordFilter.getFourLetterWords();
-		if (words == null) {
-			error("getFourLetterWords");
-		} else if(words.size()<8||!words.contains("food")||
-				!words.contains("pear")||!words.contains("taco")) {
-			error("getFourLetterWords");
-		}
-		//findFour
-		WordFilter wf = new WordFilter("Hello a food pear taco testing Food PEAR tAcO");
-		WordFilter wf2 = new WordFilter("A sentence is perfect pears tacos");
-		if (wf.findFour() != 6 || wf2.findFour() != 0) {
-			error("findFour");
-		}
-		//replaceFour
-		String resultA = wf.replaceFour("food", "$%#@$");
-		wf.replaceFour("taco", "****");
-		String resultB = wf.replaceFour("food", "****");
-		wf.replaceFour("pear", "****");
-		wf.replaceFour("pear", "****");
-		String resultC = wf.replaceFour("taco", "****");
-		String expectedA = "Hello a $%#@$ pear taco testing Food PEAR tAcO";
-		String expectedB = "Hello a $%#@$ pear **** testing **** PEAR tAcO";
-		String expectedC = "Hello a $%#@$ **** **** testing **** **** ****";
-		if (!expectedA.equals(resultA)||!expectedB.equals(resultB)||!expectedC.equals(resultC)) {
-			error("replaceFour");
-		}
+    public static void main(String[] args) {
+        if(args.length > 0 && args[0].equals("challenge")) {
+            challengeTests();
+        }else regularTests();
+    }
+
+    private static void regularTests() {
+        //getFourLetterWords
+        List<String> words = WordFilter.getFourLetterWords();
+        if (words == null) {
+            error("getFourLetterWords");
+        } else if(words.size()<8||!words.contains("food")||
+                !words.contains("pear")||!words.contains("taco")) {
+            error("getFourLetterWords");
+        }
+        //findFour
+        WordFilter wf = new WordFilter("Hello a food pear taco testing food pear taco");
+        WordFilter wf2 = new WordFilter("A sentence is perfect pears tacos");
+        List<String> findA = wf.findFour();
+        List<String> findB = wf2.findFour();
+        if (findA == null || findB == null || 
+            findA.size() != 6 || findB.size() != 0) {
+            error("findFour");
+        } else if (!findA.get(0).equals("food") || 
+            !findA.get(2).equals("taco")) {
+            error("findFour");
+        }
+        //replaceFour
+        String resultA = wf.replaceFour("food");
+        wf.replaceFour("taco");
+        String resultB = wf.replaceFour("food");
+        wf.replaceFour("pear");
+        wf.replaceFour("pear");
+        String resultC = wf.replaceFour("taco");
+        String expectedA = "Hello a **** pear taco testing food pear taco";
+        String expectedB = "Hello a **** pear **** testing **** pear taco";
+        String expectedC = "Hello a **** **** **** testing **** **** ****";
+        if (!expectedA.equals(resultA)||!expectedB.equals(resultB)||!expectedC.equals(resultC)) {
+            error("replaceFour");
+        }
         //getLog
         List<String> log = wf.getLog();
         if (log==null || log.size() != 6 || 
@@ -48,28 +60,83 @@ public class WordFilterTest {
             !log.get(5).toLowerCase().equals("taco")){
             error("getLog");
         }
-		//printFilteredText
-		PrintStream stdout = System.out;
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		System.setOut(new PrintStream(baos));
-		String text = "food pear taco testing 1 2 3 Food PEAR tAcO";
-		WordFilter filter = new WordFilter(text);
-		filter.printFilteredText();
-		String filtered = baos.toString();
-		System.setOut(stdout);
-		String expected = "**** **** **** testing 1 2 3 **** **** ****";
-		if (!expected.equals(filtered.trim())) {
-			error("printFilteredText");
-		}
-	}
-	
-	private static boolean firstError = true;
-	
-	private static void error(String err){
-		if(firstError){
-			firstError = false;
-			System.out.println("\nErrors With:");
-		}
-		System.out.println(err);
-	}
+        //printFilteredText
+        PrintStream stdout = System.out;
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(baos));
+        String text = "food pear taco testing 1 2 3 food pear taco";
+        WordFilter filter = new WordFilter(text);
+        filter.printFilteredText();
+        String filtered = baos.toString();
+        System.setOut(stdout);
+        String expected = "**** **** **** testing 1 2 3 **** **** ****";
+        if (!expected.equals(filtered.trim())) {
+            error("printFilteredText");
+        }
+    }
+
+    private static void challengeTests() {
+        //getFourLetterWords
+        List<String> words = WordFilter.getFourLetterWords();
+        if (words == null) {
+            error("getFourLetterWords");
+        } else if(words.size()<8||!words.contains("food")||
+                !words.contains("pear")||!words.contains("taco")) {
+            error("getFourLetterWords");
+        }
+        WordFilter wf = new WordFilter("Hello a food pear taco testing Food PEAR tAcO");
+        WordFilter wf2 = new WordFilter("A sentence is perfect pears tacos");
+        List<String> findA = wf.findFour();
+        List<String> findB = wf2.findFour();
+        if (findA == null || findB == null || 
+            findA.size() != 6 || findB.size() != 0) {
+            error("findFour");
+        } else if (!findA.get(0).equals("food") || 
+            !findA.get(2).equals("taco")) {
+            error("findFour");
+        }
+        //replaceFour
+        String resultA = wf.replaceFour("food");
+        wf.replaceFour("taco");
+        String resultB = wf.replaceFour("food");
+        wf.replaceFour("pear");
+        wf.replaceFour("pear");
+        String resultC = wf.replaceFour("taco");
+        String expectedA = "Hello a **** pear taco testing Food PEAR tAcO";
+        String expectedB = "Hello a **** pear **** testing **** PEAR tAcO";
+        String expectedC = "Hello a **** **** **** testing **** **** ****";
+        if (!expectedA.equals(resultA)||!expectedB.equals(resultB)||!expectedC.equals(resultC)) {
+            error("replaceFour");
+        }
+        //getLog
+        List<String> log = wf.getLog();
+        if (log==null || log.size() != 6 || 
+            !log.get(0).toLowerCase().equals("food")||
+            !log.get(5).toLowerCase().equals("taco")){
+            error("getLog");
+        }
+        //printFilteredText
+        PrintStream stdout = System.out;
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(baos));
+        String text = "food pear taco testing 1 2 3 Food PEAR tAcO";
+        WordFilter filter = new WordFilter(text);
+        filter.printFilteredText();
+        String filtered = baos.toString();
+        System.setOut(stdout);
+        String expected = "**** **** **** testing 1 2 3 **** **** ****";
+        if (!expected.equals(filtered.trim())) {
+            error("printFilteredText");
+        }
+    }
+    
+    private static boolean firstError = true;
+    
+    private static void error(String err){
+        if(firstError){
+            firstError = false;
+            System.out.println("\nErrors With:");
+        }
+        System.out.println(err);
+    }
 }
