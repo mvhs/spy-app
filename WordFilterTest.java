@@ -43,7 +43,7 @@ public class WordFilterTest {
 		}
         //getLog
         List<String> log = wf.getLog();
-        if (log.size() != 6 || 
+        if (log==null || log.size() != 6 || 
             !log.get(0).toLowerCase().equals("food")||
             !log.get(5).toLowerCase().equals("taco")){
             error("getLog");
