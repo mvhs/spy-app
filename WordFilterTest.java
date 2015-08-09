@@ -14,33 +14,48 @@ import java.util.List;
  */
 public class WordFilterTest {
     public static void main(String[] args) {
-        if(args.length > 0 && args[0].equals("challenge")) {
+        if (args[0].equals("getFourLetterWords")) {
+            testGetFourLetterWords();
+        } else if (args[0].equals("findFour")) {
+            testFindFour();
+        } else if (args[0].equals("replaceFour")) {
+            testReplaceFour();
+        } else if (args[0].equals("getLog")) {
+            testGetLog();
+        } else if (args[0].equals("printFilteredText")) {
+            testPrintFilteredText();
+        } else if (args[0].equals("challenge")) {
             challengeTests();
-        }else regularTests();
+        }
     }
-
-    private static void regularTests() {
-        //getFourLetterWords
+    
+    private static void testGetFourLetterWords() {
         List<String> words = WordFilter.getFourLetterWords();
         if (words == null) {
-            error("getFourLetterWords");
+            System.out.println("failed");
         } else if(words.size()<8||!words.contains("food")||
                 !words.contains("pear")||!words.contains("taco")) {
-            error("getFourLetterWords");
-        }
-        //findFour
+            System.out.println("failed");
+        } else System.out.println("passed");
+    }
+    
+    private static void testFindFour() {
         WordFilter wf = new WordFilter("Hello a food pear taco testing food pear taco");
         WordFilter wf2 = new WordFilter("A sentence is perfect pears tacos");
         List<String> findA = wf.findFour();
         List<String> findB = wf2.findFour();
         if (findA == null || findB == null || 
             findA.size() != 6 || findB.size() != 0) {
-            error("findFour");
+            System.out.println("failed");
         } else if (!findA.get(0).equals("food") || 
             !findA.get(2).equals("taco")) {
-            error("findFour");
-        }
-        //replaceFour
+            System.out.println("failed");
+        } else System.out.println("passed");
+    }
+    
+    private static void testReplaceFour() {
+        WordFilter wf = new WordFilter("Hello a food pear taco testing food pear taco");
+        WordFilter wf2 = new WordFilter("A sentence is perfect pears tacos");
         String resultA = wf.replaceFour("food");
         wf.replaceFour("taco");
         String resultB = wf.replaceFour("food");
@@ -51,16 +66,28 @@ public class WordFilterTest {
         String expectedB = "Hello a **** pear **** testing **** pear taco";
         String expectedC = "Hello a **** **** **** testing **** **** ****";
         if (!expectedA.equals(resultA)||!expectedB.equals(resultB)||!expectedC.equals(resultC)) {
-            error("replaceFour");
-        }
-        //getLog
+            System.out.println("failed");
+        } else System.out.println("passed");
+    }
+    
+    private static void testGetLog() {
+        WordFilter wf = new WordFilter("Hello a food pear taco testing food pear taco");
+        WordFilter wf2 = new WordFilter("A sentence is perfect pears tacos");
+        wf.replaceFour("food");
+        wf.replaceFour("taco");
+        wf.replaceFour("food");
+        wf.replaceFour("pear");
+        wf.replaceFour("pear");
+        wf.replaceFour("taco");
         List<String> log = wf.getLog();
         if (log==null || log.size() != 6 || 
             !log.get(0).toLowerCase().equals("food")||
             !log.get(5).toLowerCase().equals("taco")){
-            error("getLog");
-        }
-        //printFilteredText
+            System.out.println("failed");
+        } else System.out.println("passed");
+    }
+    
+    private static void testPrintFilteredText() {
         PrintStream stdout = System.out;
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         System.setOut(new PrintStream(baos));
@@ -71,8 +98,8 @@ public class WordFilterTest {
         System.setOut(stdout);
         String expected = "**** **** **** testing 1 2 3 **** **** ****";
         if (!expected.equals(filtered.trim())) {
-            error("printFilteredText");
-        }
+            System.out.println("failed");
+        } else System.out.println("passed");
     }
 
     private static void challengeTests() {
@@ -137,6 +164,6 @@ public class WordFilterTest {
             firstError = false;
             System.out.println("\nErrors With:");
         }
-        System.out.println(err);
+        System.out.println("    " + err);
     }
 }

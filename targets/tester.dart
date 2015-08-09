@@ -3,20 +3,25 @@
 // It will only make it harder for you to run tests
 
 import 'dart:io';
+import 'dart:convert';
+
 import 'tests.dart' as Tests;
 import 'helpers.dart';
 
 main(List<String> args){
-    if(args.length==0)runTests();
-    else if(args[0]=="submit"){
-        print(Tests.owner+":"+Tests.id);
-        for(String file in Tests.files){
+    if (args.length == 0) {
+        runTests();
+    } else if(args[0] == "submit") {
+        print(Tests.owner + ":" + Tests.id);
+        for (String file in Tests.files) {
             print(file);
         }
+    } else if (args[0] == "json") {
+        print(JSON.encode(testJson()));
     }
 }
 
-void runTests(){
+runTests(){
     try{
         print(Tests.name, BLUE);
         print("");
@@ -29,14 +34,13 @@ void runTests(){
     bool allPassed = true;
     for(Target t in targets){
         if(t is ScoredTarget){
-            maxPoints += t.points;
+            if(!t.uncounted) maxPoints += t.points;
             var s = 0;
             try{
                 s = t.test();
                 if(s==null)s=0;
-            }catch(e){
-                String error = e.toString().replaceAll("\n"," ");
-                print("Test ${t.name} failed with error: $error", RED);
+            }catch(e, st){
+                print("Test ${t.name} failed with error: $e $st", RED);
             }
             if(s is bool){
                 if(s){
@@ -46,27 +50,36 @@ void runTests(){
             }else if(s != null) score += s;
             String extra = "";
             if(t.error!=null){
-                extra = "- ${t.error}";
+                extra = " - ${t.error}";
             }
-            print("${t.name}: $s/${t.points} $extra");
+            print("${t.name}: $s/${t.points}$extra");
         }else if(t is TestTarget){
             bool result = false;
             try{
                 result = t.test();
                 if(result==null)result=false;
-            }catch(e){
-                String error = e.toString().replaceAll("\n"," ");
-                print("Test ${t.name} failed with error: $error", RED);
+            }catch(e, st){
+                print("Test ${t.name} failed with error: $e $st", RED);
             }
             String extra = "";
             if(t.error!=null){
-                extra = "- ${t.error}";
+                extra = " - ${t.error}";
             }
-            if(result){
-                print("${t.name}: Passed $extra");
-            }else{
-                print("${t.name}: Failed $extra");
-                allPassed = false;
+            if (t.points <= 0) {
+                if(result){
+                    print("${t.name}: Passed$extra");
+                }else{
+                    print("${t.name}: Failed$extra");
+                    if(!t.uncounted) allPassed = false;
+                }
+            } else {
+                if(!t.uncounted) maxPoints += t.points;
+                if(result){
+                    score += t.points;
+                    print("${t.name}: Passed (${t.points} points)$extra");
+                } else {
+                    print("${t.name}: Failed (${t.points} points)$extra");
+                }
             }
         }
     }
@@ -75,9 +88,94 @@ void runTests(){
         else print("Total Score: $score/$maxPoints", RED);
         if(!allPassed) print("Some Additional Tests Failed", RED);
     }else{
-        if(allPassed) print("All Tests Passed!", GREEN);
-        else print("Some Tests Failed", RED);
+        if(allPassed) print("All Required Tests Passed!", GREEN);
+        else print("Some Required Tests Failed", RED);
     }
+}
+
+testJson() {
+    var results = {};
+    List<Target> targets = Tests.getTargets();
+    num score = 0;
+    num maxPoints = 0;
+    results['tests'] = [];
+    for (Target t in targets) {
+        String output = "";
+        var oldprint = print;
+        print = (str) => output += str + '\n';
+        var test = {
+            'name': t.name
+        };
+        if (t is ScoredTarget) {
+            if (!t.uncounted) maxPoints += t.points;
+            test['includedInScore'] = !t.uncounted;
+            test['points'] = t.points;
+            var s = 0;
+            try {
+                s = t.test();
+                if (s == null) s = 0;
+            } catch (e, st) {
+                test['result'] = 'crash';
+                test['crash'] = {
+                    'exception': e.toString(),
+                    'stackTrace': st
+                };
+                test['score'] = 0;
+                if (t.error != null) test['message'] = t.error;
+                continue;
+            }
+            if (s is bool) {
+                if (s) {
+                    s = t.points;
+                    score += t.points;
+                } else s = 0;
+            } else if (s != null) score += s;
+            test['score'] = s;
+            if (t.error != null) test['message'] = t.error;
+            if (s >= t.points) {
+                test['result'] = 'passed';
+            } else if (s == 0) {
+                test['result'] = 'failed';
+            } else test['result'] = 'partial';
+        } else if (t is TestTarget) {
+            bool result = false;
+            try {
+                result = t.test();
+                if (result == null) result = false;
+            } catch (e, st) {
+                test['result'] = 'crash';
+                test['crash'] = {
+                    'exception': e.toString(),
+                    'stackTrace': st
+                };
+                if (t.points > 0) {
+                    test['points'] = t.points;
+                    test['score'] = 0;
+                    test['includedInScore'] = !t.uncounted;
+                    if (!t.uncounted) maxPoints += t.points;
+                }
+                if (t.error != null) test['message'] = t.error;
+                continue;
+            }
+            if (result) {
+                test['result'] = 'passed';
+            } else test['result'] = 'failed';
+            if (t.points > 0) {
+                test['points'] = t.points;
+                test['score'] = result ? t.points : 0;
+                score += test['score'];
+                test['includedInScore'] = !t.uncounted;
+                if (!t.uncounted) maxPoints += t.points;
+            }
+            if (t.error != null) test['message'] = t.error;
+        }
+        test['output'] = output;
+        results['tests'].add(test);
+        print = oldprint;
+    }
+    results['score'] = score;
+    results['points'] = maxPoints;
+    return results;
 }
 
 const String PLAIN = "plain";

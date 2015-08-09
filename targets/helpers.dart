@@ -8,15 +8,19 @@ abstract class Target{
     Function test;
     String name;
     String error;
+    bool uncounted = false;
 }
 
-/// This creates an unscored target
+/// This creates an unscored or simple-scored target
 /// [test] should return a bool
 class TestTarget extends Target{
     Function test = ()=>false;
     String name;
+    // If <= 0, Target is unscored
+    // If > 0, Target earns [points] points if test returns true
+    num points = -1;
 
-    TestTarget(this.name, [Function test()]);
+    TestTarget(this.name, [Function test(), this.points=-1]);
 }
 
 /// This creates a scored target
@@ -89,7 +93,7 @@ main(){
     });
 }
 ''');
-            String out = Process.runSync('dart',['.tempscript.dart']).stdout;
+            String out = Process.runSync('dart',['.tempscript.dart']).stdout.trim();
             out = out.replaceAll("\r\n","\n");
             if(postCommand!=null){
                 if(postCommand is String) runCommand(postCommand);
@@ -99,9 +103,11 @@ main(){
             }
             if(Platform.isWindows) Process.runSync('del',['.tempscript.dart'],runInShell:true);
             else Process.runSync('rm',['.tempscript.dart']);
-            bool result = output==out||output+"\n"==out;
+            bool result = output==out || output+"\n"==out || output==out+"\n";
             if(!result){
-                this.error = "Expected $output, got $out";
+                if (output == "") {
+                    this.error = out;
+                }
             }
             return result;
         };
@@ -125,7 +131,10 @@ main(){
         String pre = "javac -nowarn $compileClass.java";
         String command = "java $mainClass";
         if(io.args != null) command += " ${io.args}";
-        return new IOTarget(io.name, command, input, output, pre);
+        IOTarget t = new IOTarget(io.name, command, io.input, io.output, pre);
+        t.points = io.points;
+        t.uncounted = io.uncounted;
+        return t;
     }
 
     /// Generates multiple IOTargets for a single Java program
@@ -141,15 +150,21 @@ main(){
             if(targets.length==0) pre = "javac -nowarn $compileClass.java";
             String command = "java $mainClass";
             if(io.args!=null) command += " ${io.args}";
-            targets.add(new IOTarget(io.name, command, io.input, io.output, pre));
+            IOTarget t = new IOTarget(io.name, command, io.input, io.output, pre);
+            t.points = io.points;
+            t.uncounted = io.uncounted;
+            targets.add(t);
         }
         return targets;
     }
 
     /// (e.g.) make("python3 square.py", new InputOutput("Test","4","16"))
     static IOTarget make(String command, InputOutput io){
-        if(io.args != null) command += "${io.args}";
-        return new IOTarget(io.name, command, io.input, io.output);
+        if(io.args != null) command += " ${io.args}";
+        IOTarget t = new IOTarget(io.name, command, io.input, io.output);
+        t.points = io.points;
+        t.uncounted = io.uncounted;
+        return t;
     }
 
     static List<IOTarget> makeMulti(String command, List<InputOutput> ios){
@@ -167,6 +182,8 @@ class InputOutput{
     /// These can be Strings or Files
     var input = "";
     var output;
+    var points = -1;
+    bool uncounted = false;
 
     /// This is arguments on the command, separated by spaces
     String args;
@@ -174,9 +191,9 @@ class InputOutput{
     /// This is the name of the test for this InputOutput
     String name;
 
-    InputOutput(this.name, this.input, this.output);
+    InputOutput(this.name, this.input, this.output, [this.points=-1, this.uncounted=false]);
 
-    InputOutput.withArgsInput(this.name, this.args, this.input, this.output);
+    InputOutput.withArgsInput(this.name, this.args, this.input, this.output, [this.points=-1, this.uncounted=false]);
 
-    InputOutput.withArgs(this.name, this.args, this.output);
+    InputOutput.withArgs(this.name, this.args, this.output, [this.points=-1, this.uncounted=false]);
 }

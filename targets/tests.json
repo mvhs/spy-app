@@ -1,0 +1,54 @@
+{
+    "name": "Grandma's Spy App",
+    "owner": "mvhs",
+    "id": "spy-app",
+    "files": [
+        "WordFilter.java",
+        "SpyApp.java"
+    ],
+    "language": "java",
+    "tests": [
+        {
+            "name": "getFourLetterWords",
+            "args": "getFourLetterWords",
+            "output": "passed",
+            "run": "WordFilterTest.java",
+            "points": 1
+        },
+        {
+            "name": "findFour",
+            "args": "findFour",
+            "output": "passed",
+            "run": "WordFilterTest.java",
+            "points": 3
+        },
+        {
+            "name": "replaceFour",
+            "args": "replaceFour",
+            "output": "passed",
+            "run": "WordFilterTest.java",
+            "points": 3
+        },
+        {
+            "name": "getLog",
+            "args": "getLog",
+            "output": "passed",
+            "run": "WordFilterTest.java",
+            "points": 1
+        },
+        {
+            "name": "printFilteredText",
+            "args": "printFilteredText",
+            "output": "passed",
+            "run": "WordFilterTest.java",
+            "points": 2
+        },
+        {
+            "name": "Bonus Challenge",
+            "args": "challenge",
+            "output": "",
+            "run": "WordFilterTest.java",
+            "points": -1
+        }
+    ]
+}
